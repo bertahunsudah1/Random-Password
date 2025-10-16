@@ -1,0 +1,18 @@
+name: Update Stats
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update STATS
+        run: |
+          gh api repos/${{ github.repository }} --jq '{stars:.stargazers_count,forks:.forks_count,issues:.open_issues_count}' > stats.json || true
+          echo "# Stats" > STATS.md
+          if [ -f stats.json ]; then cat stats.json >> STATS.md; fi
+          git add STATS.md || true
+          git commit -m "ci: update STATS.md [skip ci]" || true
+          git push || true
